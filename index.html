@@ -1,0 +1,1734 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>German Sentence Trainer</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    select,
+    input[type="number"],
+    input[type="range"] {
+      width: 100%;
+    }
+
+    select,
+    input[type="number"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      background: #e9ecef;
+      transition: 0.15s;
+    }
+
+    button:hover {
+      background: #dfe3e6;
+    }
+
+    button.primary {
+      background: #222;
+      color: white;
+    }
+
+    button.primary:hover {
+      background: #000;
+    }
+
+    button.danger {
+      background: #f1dede;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .sentence-card {
+      text-align: center;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .progress {
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .question-label {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .question {
+      font-size: 30px;
+      font-weight: bold;
+      line-height: 1.4;
+      margin-bottom: 30px;
+    }
+
+    .answer {
+      font-size: 25px;
+      line-height: 1.4;
+      padding: 18px;
+      border-radius: 10px;
+      background: #f4f6f8;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      min-height: 20px;
+      margin-top: 15px;
+    }
+
+    .auto-panel {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background: #f7f7f7;
+    }
+
+    .auto-panel strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      background: #ccc;
+      border-radius: 30px;
+      transition: 0.2s;
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    input:checked + .slider {
+      background: #222;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .range-value {
+      font-weight: normal;
+      color: #555;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+
+    .error {
+      color: #a00;
+      background: #fceaea;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 650px) {
+      .controls,
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .question {
+        font-size: 23px;
+      }
+
+      .answer {
+        font-size: 20px;
+      }
+
+      .container {
+        margin: 15px auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🇩🇪 German Sentence Trainer</h1>
+  <div class="subtitle">
+    Listen → Speak → Check → Repeat
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card">
+
+    <div class="controls">
+
+      <div class="control-group">
+        <label for="mode">Practice mode</label>
+
+        <select id="mode">
+          <option value="en-de">English → German</option>
+          <option value="de-en">German → English</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Sequence</label>
+
+        <div class="button-row" style="margin-top:0">
+          <button id="randomizeBtn">🔀 Randomize</button>
+          <button id="restartBtn">↻ Restart</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="auto-panel">
+
+      <div class="switch-row">
+
+        <div>
+          <strong>Automatic practice</strong>
+          <span>
+            Automatically speak the question, wait, speak the answer,
+            then continue.
+          </span>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="autoPlay">
+          <span class="slider"></span>
+        </label>
+
+      </div>
+
+    </div>
+
+    <div class="settings-grid">
+
+      <div class="control-group">
+        <label for="answerDelay">
+          Answer delay:
+          <span class="range-value" id="answerDelayValue">4 s</span>
+        </label>
+
+        <input
+          type="range"
+          id="answerDelay"
+          min="1"
+          max="10"
+          step="1"
+          value="4"
+        />
+      </div>
+
+      <div class="control-group">
+        <label for="nextDelay">
+          Next sentence:
+          <span class="range-value" id="nextDelayValue">3 s</span>
+        </label>
+
+        <input
+          type="range"
+          id="nextDelay"
+          min="1"
+          max="10"
+          step="1"
+          value="3"
+        />
+      </div>
+
+      <div class="control-group">
+        <label for="speechRate">
+          Speech speed:
+          <span class="range-value" id="speechRateValue">0.9</span>
+        </label>
+
+        <input
+          type="range"
+          id="speechRate"
+          min="0.5"
+          max="1.5"
+          step="0.1"
+          value="0.9"
+        />
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- SENTENCE -->
+  <div class="card sentence-card">
+
+    <div class="progress" id="progress">
+      Loading sentences...
+    </div>
+
+    <div class="question-label" id="questionLabel">
+      Question
+    </div>
+
+    <div class="question" id="question">
+      <div class="loading">
+        Loading Google Sheet...
+      </div>
+    </div>
+
+    <div id="answerContainer" class="hidden">
+
+      <div class="question-label">
+        Answer
+      </div>
+
+      <div class="answer" id="answer"></div>
+
+    </div>
+
+    <div class="button-row" style="justify-content:center">
+
+      <button id="replayBtn" class="primary">
+        🔊 Replay
+      </button>
+
+      <button id="showAnswerBtn">
+        👁 Show Answer
+      </button>
+
+      <button id="speakAnswerBtn">
+        🔊 Speak Answer
+      </button>
+
+      <button id="nextBtn">
+        Next →
+      </button>
+
+    </div>
+
+    <div class="status" id="status"></div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* ============================================================
+     GOOGLE SHEET CONFIGURATION
+     ============================================================ */
+
+  const SHEET_ID =
+    "1jf4Rbrl-zyghEYq-u5CX3P96192JCp0ee6gDaNHL0Js";
+
+  const GID =
+    "189791548";
+
+
+  /* ============================================================
+     APPLICATION STATE
+     ============================================================ */
+
+  let sentences = [];
+
+  let queue = [];
+
+  let queueIndex = 0;
+
+  let mode = "en-de";
+
+  let autoPlay = false;
+
+  let answerDelay = 4;
+
+  let nextDelay = 3;
+
+  let speechRate = 0.9;
+
+  let autoTimer = null;
+
+  let isSpeaking = false;
+
+
+  /* ============================================================
+     DOM ELEMENTS
+     ============================================================ */
+
+  const modeElement =
+    document.getElementById("mode");
+
+  const randomizeBtn =
+    document.getElementById("randomizeBtn");
+
+  const restartBtn =
+    document.getElementById("restartBtn");
+
+  const replayBtn =
+    document.getElementById("replayBtn");
+
+  const showAnswerBtn =
+    document.getElementById("showAnswerBtn");
+
+  const speakAnswerBtn =
+    document.getElementById("speakAnswerBtn");
+
+  const nextBtn =
+    document.getElementById("nextBtn");
+
+  const autoPlayElement =
+    document.getElementById("autoPlay");
+
+  const answerDelayElement =
+    document.getElementById("answerDelay");
+
+  const nextDelayElement =
+    document.getElementById("nextDelay");
+
+  const speechRateElement =
+    document.getElementById("speechRate");
+
+  const answerDelayValue =
+    document.getElementById("answerDelayValue");
+
+  const nextDelayValue =
+    document.getElementById("nextDelayValue");
+
+  const speechRateValue =
+    document.getElementById("speechRateValue");
+
+  const questionElement =
+    document.getElementById("question");
+
+  const questionLabel =
+    document.getElementById("questionLabel");
+
+  const answerElement =
+    document.getElementById("answer");
+
+  const answerContainer =
+    document.getElementById("answerContainer");
+
+  const progressElement =
+    document.getElementById("progress");
+
+  const statusElement =
+    document.getElementById("status");
+
+
+  /* ============================================================
+     LOCAL STORAGE
+     ============================================================ */
+
+  const STORAGE_KEY =
+    "german_sentence_trainer_v1";
+
+
+  function saveState() {
+
+    const state = {
+
+      queue: queue,
+
+      queueIndex: queueIndex,
+
+      mode: mode,
+
+      autoPlay: autoPlay,
+
+      answerDelay: answerDelay,
+
+      nextDelay: nextDelay,
+
+      speechRate: speechRate
+
+    };
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(state)
+    );
+  }
+
+
+  function loadState() {
+
+    try {
+
+      const saved =
+        localStorage.getItem(STORAGE_KEY);
+
+      if (!saved) {
+        return false;
+      }
+
+      const state =
+        JSON.parse(saved);
+
+      if (
+        Array.isArray(state.queue) &&
+        typeof state.queueIndex === "number"
+      ) {
+
+        queue = state.queue;
+        queueIndex = state.queueIndex;
+
+      }
+
+      if (
+        state.mode === "en-de" ||
+        state.mode === "de-en"
+      ) {
+        mode = state.mode;
+      }
+
+      if (typeof state.autoPlay === "boolean") {
+        autoPlay = state.autoPlay;
+      }
+
+      if (typeof state.answerDelay === "number") {
+        answerDelay = state.answerDelay;
+      }
+
+      if (typeof state.nextDelay === "number") {
+        nextDelay = state.nextDelay;
+      }
+
+      if (typeof state.speechRate === "number") {
+        speechRate = state.speechRate;
+      }
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        "Could not restore saved state:",
+        error
+      );
+
+      return false;
+    }
+  }
+
+
+  /* ============================================================
+     SHUFFLE
+     ============================================================ */
+
+  function shuffle(array) {
+
+    const result = [...array];
+
+    for (
+      let i = result.length - 1;
+      i > 0;
+      i--
+    ) {
+
+      const j =
+        Math.floor(Math.random() * (i + 1));
+
+      [
+        result[i],
+        result[j]
+      ] = [
+        result[j],
+        result[i]
+      ];
+    }
+
+    return result;
+  }
+
+
+  /* ============================================================
+     GOOGLE SHEET LOADING
+     ============================================================ */
+
+  function loadSheet() {
+
+    statusElement.textContent =
+      "Loading sentences...";
+
+    const script =
+      document.createElement("script");
+
+    const query =
+      "select A,B";
+
+    script.src =
+      "https://docs.google.com/spreadsheets/d/" +
+      SHEET_ID +
+      "/gviz/tq" +
+      "?tqx=responseHandler:sheetCallback;headers=1" +
+      "&gid=" +
+      encodeURIComponent(GID) +
+      "&tq=" +
+      encodeURIComponent(query) +
+      "&t=" +
+      Date.now();
+
+    script.onerror = function () {
+
+      questionElement.innerHTML =
+        '<div class="error">' +
+        "Could not load the Google Sheet." +
+        "</div>";
+
+      statusElement.textContent =
+        "Check that the Google Sheet is publicly accessible.";
+
+    };
+
+    document.body.appendChild(script);
+  }
+
+
+  /*
+   * Google Visualization API callback.
+   *
+   * Column A = German
+   * Column B = English
+   */
+
+  window.sheetCallback =
+    function(data) {
+
+      try {
+
+        const rows =
+          data.table.rows;
+
+        sentences = [];
+
+        rows.forEach(function(row) {
+
+          const german =
+            row.c[0]
+              ? String(row.c[0].v || "").trim()
+              : "";
+
+          const english =
+            row.c[1]
+              ? String(row.c[1].v || "").trim()
+              : "";
+
+          if (german && english) {
+
+            sentences.push({
+              german: german,
+              english: english
+            });
+
+          }
+
+        });
+
+
+        if (sentences.length === 0) {
+
+          questionElement.innerHTML =
+            '<div class="error">' +
+            "No sentences were found in columns A and B." +
+            "</div>";
+
+          statusElement.textContent = "";
+
+          return;
+        }
+
+
+        initializeApplication();
+
+      } catch (error) {
+
+        console.error(error);
+
+        questionElement.innerHTML =
+          '<div class="error">' +
+          "Could not process the Google Sheet." +
+          "</div>";
+
+      }
+
+    };
+
+
+  /* ============================================================
+     INITIALIZATION
+     ============================================================ */
+
+  function initializeApplication() {
+
+    const restored =
+      loadState();
+
+
+    /*
+     * Validate restored queue.
+     *
+     * If the Google Sheet has changed and the old queue
+     * contains invalid indices, create a new queue.
+     */
+
+    const queueIsValid =
+      queue.length === sentences.length &&
+      queue.every(
+        index =>
+          Number.isInteger(index) &&
+          index >= 0 &&
+          index < sentences.length
+      );
+
+
+    if (!queueIsValid) {
+
+      queue =
+        shuffle(
+          sentences.map(
+            (_, index) => index
+          )
+        );
+
+      queueIndex = 0;
+
+    } else {
+
+      /*
+       * Make sure queueIndex is valid.
+       */
+
+      if (
+        queueIndex < 0 ||
+        queueIndex >= queue.length
+      ) {
+        queueIndex = 0;
+      }
+
+    }
+
+
+    modeElement.value =
+      mode;
+
+    autoPlayElement.checked =
+      autoPlay;
+
+    answerDelayElement.value =
+      answerDelay;
+
+    nextDelayElement.value =
+      nextDelay;
+
+    speechRateElement.value =
+      speechRate;
+
+    updateSettingsDisplay();
+
+    updateQuestion();
+
+    saveState();
+
+    statusElement.textContent =
+      `${sentences.length} sentences loaded.`;
+
+  }
+
+
+  /* ============================================================
+     QUESTION DISPLAY
+     ============================================================ */
+
+  function getCurrentSentence() {
+
+    if (
+      !sentences.length ||
+      !queue.length
+    ) {
+      return null;
+    }
+
+    const index =
+      queue[queueIndex];
+
+    return sentences[index];
+
+  }
+
+
+  function updateQuestion() {
+
+    const sentence =
+      getCurrentSentence();
+
+    if (!sentence) {
+      return;
+    }
+
+
+    stopSpeech();
+
+    clearAutoTimer();
+
+
+    const question =
+      mode === "en-de"
+        ? sentence.english
+        : sentence.german;
+
+
+    questionElement.textContent =
+      question;
+
+
+    questionLabel.textContent =
+      mode === "en-de"
+        ? "Listen to English → Speak German"
+        : "Listen to German → Speak English";
+
+
+    answerElement.textContent =
+      mode === "en-de"
+        ? sentence.german
+        : sentence.english;
+
+
+    answerContainer.classList.add(
+      "hidden"
+    );
+
+
+    showAnswerBtn.textContent =
+      "👁 Show Answer";
+
+
+    progressElement.textContent =
+      `Sentence ${queueIndex + 1} / ${queue.length}`;
+
+
+    statusElement.textContent =
+      "";
+
+
+    saveState();
+
+  }
+
+
+  /* ============================================================
+     TEXT TO SPEECH
+     ============================================================ */
+
+  function getVoice(language) {
+
+    const voices =
+      window.speechSynthesis.getVoices();
+
+    if (!voices.length) {
+      return null;
+    }
+
+
+    /*
+     * First try exact language.
+     */
+
+    let voice =
+      voices.find(
+        v =>
+          v.lang.toLowerCase() ===
+          language.toLowerCase()
+      );
+
+
+    /*
+     * Otherwise try language prefix.
+     */
+
+    if (!voice) {
+
+      const prefix =
+        language
+          .split("-")[0]
+          .toLowerCase();
+
+      voice =
+        voices.find(
+          v =>
+            v.lang
+              .toLowerCase()
+              .startsWith(prefix)
+        );
+
+    }
+
+
+    return voice || null;
+
+  }
+
+
+  function speak(
+    text,
+    language,
+    callback
+  ) {
+
+    stopSpeech();
+
+    const utterance =
+      new SpeechSynthesisUtterance(text);
+
+    utterance.lang =
+      language;
+
+    utterance.rate =
+      speechRate;
+
+    const voice =
+      getVoice(language);
+
+    if (voice) {
+      utterance.voice = voice;
+    }
+
+
+    utterance.onstart =
+      function() {
+
+        isSpeaking = true;
+
+        statusElement.textContent =
+          "🔊 Speaking...";
+
+      };
+
+
+    utterance.onend =
+      function() {
+
+        isSpeaking = false;
+
+        if (callback) {
+          callback();
+        } else {
+          statusElement.textContent = "";
+        }
+
+      };
+
+
+    utterance.onerror =
+      function(event) {
+
+        isSpeaking = false;
+
+        console.error(
+          "Speech synthesis error:",
+          event
+        );
+
+        statusElement.textContent =
+          "Speech synthesis error.";
+
+        if (callback) {
+          callback();
+        }
+
+      };
+
+
+    window.speechSynthesis.speak(
+      utterance
+    );
+
+  }
+
+
+  function stopSpeech() {
+
+    if (
+      "speechSynthesis" in window
+    ) {
+
+      window.speechSynthesis.cancel();
+
+    }
+
+    isSpeaking = false;
+
+  }
+
+
+  /* ============================================================
+     SPEAK QUESTION
+     ============================================================ */
+
+  function speakQuestion() {
+
+    const sentence =
+      getCurrentSentence();
+
+    if (!sentence) {
+      return;
+    }
+
+
+    const text =
+      mode === "en-de"
+        ? sentence.english
+        : sentence.german;
+
+
+    const language =
+      mode === "en-de"
+        ? "en-US"
+        : "de-DE";
+
+
+    speak(
+      text,
+      language
+    );
+
+  }
+
+
+  /* ============================================================
+     SPEAK ANSWER
+     ============================================================ */
+
+  function speakAnswer() {
+
+    const sentence =
+      getCurrentSentence();
+
+    if (!sentence) {
+      return;
+    }
+
+
+    showAnswer();
+
+
+    const text =
+      mode === "en-de"
+        ? sentence.german
+        : sentence.english;
+
+
+    const language =
+      mode === "en-de"
+        ? "de-DE"
+        : "en-US";
+
+
+    speak(
+      text,
+      language
+    );
+
+  }
+
+
+  /* ============================================================
+     SHOW ANSWER
+     ============================================================ */
+
+  function showAnswer() {
+
+    answerContainer.classList.remove(
+      "hidden"
+    );
+
+    showAnswerBtn.textContent =
+      "🙈 Hide Answer";
+
+  }
+
+
+  function toggleAnswer() {
+
+    if (
+      answerContainer.classList.contains(
+        "hidden"
+      )
+    ) {
+
+      showAnswer();
+
+    } else {
+
+      answerContainer.classList.add(
+        "hidden"
+      );
+
+      showAnswerBtn.textContent =
+        "👁 Show Answer";
+
+    }
+
+  }
+
+
+  /* ============================================================
+     NEXT SENTENCE
+     ============================================================ */
+
+  function nextSentence() {
+
+    stopSpeech();
+
+    clearAutoTimer();
+
+
+    if (!queue.length) {
+      return;
+    }
+
+
+    queueIndex++;
+
+
+    /*
+     * When the current sequence is finished,
+     * generate another randomized sequence.
+     */
+
+    if (queueIndex >= queue.length) {
+
+      queue =
+        shuffle(
+          sentences.map(
+            (_, index) => index
+          )
+        );
+
+      queueIndex = 0;
+
+    }
+
+
+    updateQuestion();
+
+    saveState();
+
+  }
+
+
+  /* ============================================================
+     RANDOMIZE
+     ============================================================ */
+
+  function randomizeSequence() {
+
+    stopAutoPlay();
+
+    stopSpeech();
+
+
+    queue =
+      shuffle(
+        sentences.map(
+          (_, index) => index
+        )
+      );
+
+    queueIndex = 0;
+
+
+    updateQuestion();
+
+    statusElement.textContent =
+      "🔀 New randomized sequence.";
+
+    saveState();
+
+  }
+
+
+  /* ============================================================
+     RESTART
+     ============================================================ */
+
+  function restartSequence() {
+
+    stopAutoPlay();
+
+    stopSpeech();
+
+    queueIndex = 0;
+
+    updateQuestion();
+
+    statusElement.textContent =
+      "Sequence restarted.";
+
+    saveState();
+
+  }
+
+
+  /* ============================================================
+     AUTOMATIC PRACTICE
+     ============================================================ */
+
+  function clearAutoTimer() {
+
+    if (autoTimer !== null) {
+
+      clearTimeout(autoTimer);
+
+      autoTimer = null;
+
+    }
+
+  }
+
+
+  function startAutoPlay() {
+
+    if (!sentences.length) {
+      return;
+    }
+
+
+    autoPlay = true;
+
+    autoPlayElement.checked =
+      true;
+
+    saveState();
+
+
+    runAutoSentence();
+
+  }
+
+
+  function stopAutoPlay() {
+
+    autoPlay = false;
+
+    autoPlayElement.checked =
+      false;
+
+    clearAutoTimer();
+
+    stopSpeech();
+
+    statusElement.textContent =
+      "Automatic practice stopped.";
+
+    saveState();
+
+  }
+
+
+  function runAutoSentence() {
+
+    if (!autoPlay) {
+      return;
+    }
+
+
+    const sentence =
+      getCurrentSentence();
+
+    if (!sentence) {
+      return;
+    }
+
+
+    /*
+     * Make sure answer is hidden initially.
+     */
+
+    answerContainer.classList.add(
+      "hidden"
+    );
+
+    showAnswerBtn.textContent =
+      "👁 Show Answer";
+
+
+    /*
+     * STEP 1
+     *
+     * Speak the question.
+     */
+
+    const question =
+      mode === "en-de"
+        ? sentence.english
+        : sentence.german;
+
+
+    const questionLanguage =
+      mode === "en-de"
+        ? "en-US"
+        : "de-DE";
+
+
+    statusElement.textContent =
+      "🔊 Question";
+
+
+    speak(
+      question,
+      questionLanguage,
+      function() {
+
+        if (!autoPlay) {
+          return;
+        }
+
+
+        /*
+         * STEP 2
+         *
+         * Wait for the user to answer aloud.
+         */
+
+        statusElement.textContent =
+          `🎤 Your turn... (${answerDelay}s)`;
+
+
+        autoTimer =
+          setTimeout(
+            function() {
+
+              if (!autoPlay) {
+                return;
+              }
+
+
+              /*
+               * STEP 3
+               *
+               * Reveal and speak answer.
+               */
+
+              showAnswer();
+
+
+              const answer =
+                mode === "en-de"
+                  ? sentence.german
+                  : sentence.english;
+
+
+              const answerLanguage =
+                mode === "en-de"
+                  ? "de-DE"
+                  : "en-US";
+
+
+              speak(
+                answer,
+                answerLanguage,
+                function() {
+
+                  if (!autoPlay) {
+                    return;
+                  }
+
+
+                  /*
+                   * STEP 4
+                   *
+                   * Wait before moving
+                   * to next sentence.
+                   */
+
+                  statusElement.textContent =
+                    `Next sentence in ${nextDelay}s...`;
+
+
+                  autoTimer =
+                    setTimeout(
+                      function() {
+
+                        if (!autoPlay) {
+                          return;
+                        }
+
+
+                        queueIndex++;
+
+
+                        /*
+                         * At the end of the sequence,
+                         * create a new randomized queue.
+                         */
+
+                        if (
+                          queueIndex >= queue.length
+                        ) {
+
+                          queue =
+                            shuffle(
+                              sentences.map(
+                                (_, index) => index
+                              )
+                            );
+
+                          queueIndex = 0;
+
+                        }
+
+
+                        updateQuestion();
+
+                        saveState();
+
+                        runAutoSentence();
+
+                      },
+                      nextDelay * 1000
+                    );
+
+                }
+
+              );
+
+            },
+            answerDelay * 1000
+          );
+
+      }
+
+    );
+
+  }
+
+
+  /* ============================================================
+     SETTINGS
+     ============================================================ */
+
+  function updateSettingsDisplay() {
+
+    answerDelayValue.textContent =
+      `${answerDelay} s`;
+
+    nextDelayValue.textContent =
+      `${nextDelay} s`;
+
+    speechRateValue.textContent =
+      speechRate.toFixed(1);
+
+  }
+
+
+  /* ============================================================
+     EVENT HANDLERS
+     ============================================================ */
+
+  modeElement.addEventListener(
+    "change",
+    function() {
+
+      mode =
+        modeElement.value;
+
+      updateQuestion();
+
+      saveState();
+
+    }
+  );
+
+
+  randomizeBtn.addEventListener(
+    "click",
+    function() {
+
+      randomizeSequence();
+
+    }
+  );
+
+
+  restartBtn.addEventListener(
+    "click",
+    function() {
+
+      restartSequence();
+
+    }
+  );
+
+
+  replayBtn.addEventListener(
+    "click",
+    function() {
+
+      speakQuestion();
+
+    }
+  );
+
+
+  showAnswerBtn.addEventListener(
+    "click",
+    function() {
+
+      toggleAnswer();
+
+    }
+  );
+
+
+  speakAnswerBtn.addEventListener(
+    "click",
+    function() {
+
+      speakAnswer();
+
+    }
+  );
+
+
+  nextBtn.addEventListener(
+    "click",
+    function() {
+
+      nextSentence();
+
+    }
+  );
+
+
+  autoPlayElement.addEventListener(
+    "change",
+    function() {
+
+      if (
+        autoPlayElement.checked
+      ) {
+
+        startAutoPlay();
+
+      } else {
+
+        stopAutoPlay();
+
+      }
+
+    }
+  );
+
+
+  answerDelayElement.addEventListener(
+    "input",
+    function() {
+
+      answerDelay =
+        Number(
+          answerDelayElement.value
+        );
+
+      updateSettingsDisplay();
+
+      saveState();
+
+    }
+  );
+
+
+  nextDelayElement.addEventListener(
+    "input",
+    function() {
+
+      nextDelay =
+        Number(
+          nextDelayElement.value
+        );
+
+      updateSettingsDisplay();
+
+      saveState();
+
+    }
+  );
+
+
+  speechRateElement.addEventListener(
+    "input",
+    function() {
+
+      speechRate =
+        Number(
+          speechRateElement.value
+        );
+
+      updateSettingsDisplay();
+
+      saveState();
+
+    }
+  );
+
+
+  /* ============================================================
+     SPEECH VOICE INITIALIZATION
+     ============================================================ */
+
+  /*
+   * Some browsers populate the available voices
+   * asynchronously.
+   */
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    window.speechSynthesis.onvoiceschanged =
+      function() {
+
+        window.speechSynthesis.getVoices();
+
+      };
+
+  }
+
+
+  /* ============================================================
+     START APPLICATION
+     ============================================================ */
+
+  if (
+    !("speechSynthesis" in window)
+  ) {
+
+    statusElement.textContent =
+      "Your browser does not support speech synthesis.";
+
+  }
+
+
+  loadSheet();
+
+</script>
+
+</body>
+</html>
+```
