@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
   <title>German Sentence Trainer</title>
 
   <style>
@@ -98,6 +101,13 @@
 
     button.danger {
       background: #f1dede;
+    }
+
+    button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
     }
 
     .button-row {
@@ -243,6 +253,65 @@
       border-radius: 8px;
     }
 
+    /* Sentence range selection */
+    .range-selection {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e5e5;
+    }
+
+    .range-selection-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 14px;
+    }
+
+    .range-selection-header strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .range-selection-header span {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .range-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .range-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .range-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .range-option:hover {
+      background: #f1f3f5;
+    }
+
+    .range-option input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
     @media (max-width: 650px) {
       .controls,
       .settings-grid {
@@ -265,915 +334,748 @@
 </head>
 
 <body>
+  <div class="container">
+    <h1>🇩🇪 German Sentence Trainer</h1>
 
-<div class="container">
+    <div class="subtitle">
+      Listen → Speak → Check → Repeat
+    </div>
 
-  <h1>🇩🇪 German Sentence Trainer</h1>
-  <div class="subtitle">
-    Listen → Speak → Check → Repeat
-  </div>
+    <!-- SETTINGS -->
+    <div class="card">
+      <div class="controls">
+        <div class="control-group">
+          <label for="mode">Practice mode</label>
 
-  <!-- SETTINGS -->
-  <div class="card">
+          <select id="mode">
+            <option value="en-de">English → German</option>
+            <option value="de-en">German → English</option>
+          </select>
+        </div>
 
-    <div class="controls">
+        <div class="control-group">
+          <label>Sequence</label>
 
-      <div class="control-group">
-        <label for="mode">Practice mode</label>
-
-        <select id="mode">
-          <option value="en-de">English → German</option>
-          <option value="de-en">German → English</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label>Sequence</label>
-
-        <div class="button-row" style="margin-top:0">
-          <button id="randomizeBtn">🔀 Randomize</button>
-          <button id="restartBtn">↻ Restart</button>
+          <div class="button-row" style="margin-top: 0">
+            <button id="randomizeBtn">🔀 Randomize</button>
+            <button id="restartBtn">↻ Restart</button>
+          </div>
         </div>
       </div>
 
-    </div>
+      <div class="auto-panel">
+        <div class="switch-row">
+          <div>
+            <strong>Automatic practice</strong>
+            <span>
+              Automatically speak the question, wait, speak the answer,
+              then continue.
+            </span>
+          </div>
 
-    <div class="auto-panel">
+          <label class="switch">
+            <input type="checkbox" id="autoPlay" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
 
-      <div class="switch-row">
+      <div class="settings-grid">
+        <div class="control-group">
+          <label for="answerDelay">
+            Answer delay:
+            <span class="range-value" id="answerDelayValue">4 s</span>
+          </label>
 
-        <div>
-          <strong>Automatic practice</strong>
-          <span>
-            Automatically speak the question, wait, speak the answer,
-            then continue.
-          </span>
+          <input
+            type="range"
+            id="answerDelay"
+            min="1"
+            max="10"
+            step="1"
+            value="4"
+          />
         </div>
 
-        <label class="switch">
-          <input type="checkbox" id="autoPlay">
-          <span class="slider"></span>
-        </label>
+        <div class="control-group">
+          <label for="nextDelay">
+            Next sentence:
+            <span class="range-value" id="nextDelayValue">3 s</span>
+          </label>
 
+          <input
+            type="range"
+            id="nextDelay"
+            min="1"
+            max="10"
+            step="1"
+            value="3"
+          />
+        </div>
+
+        <div class="control-group">
+          <label for="speechRate">
+            Speech speed:
+            <span class="range-value" id="speechRateValue">0.9</span>
+          </label>
+
+          <input
+            type="range"
+            id="speechRate"
+            min="0.5"
+            max="1.5"
+            step="0.1"
+            value="0.9"
+          />
+        </div>
       </div>
 
+      <!-- SENTENCE RANGE SELECTION -->
+      <div class="range-selection">
+        <div class="range-selection-header">
+          <div>
+            <strong>Sentence ranges</strong>
+            <span>Select the sentence groups you want to practise.</span>
+          </div>
+
+          <div class="range-buttons">
+            <button id="selectAllRangesBtn">Select All</button>
+            <button id="deselectAllRangesBtn" class="danger">
+              Deselect All
+            </button>
+          </div>
+        </div>
+
+        <div class="range-list" id="rangeList"></div>
+      </div>
     </div>
 
-    <div class="settings-grid">
-
-      <div class="control-group">
-        <label for="answerDelay">
-          Answer delay:
-          <span class="range-value" id="answerDelayValue">4 s</span>
-        </label>
-
-        <input
-          type="range"
-          id="answerDelay"
-          min="1"
-          max="10"
-          step="1"
-          value="4"
-        />
+    <!-- SENTENCE -->
+    <div class="card sentence-card">
+      <div class="progress" id="progress">
+        Loading sentences...
       </div>
 
-      <div class="control-group">
-        <label for="nextDelay">
-          Next sentence:
-          <span class="range-value" id="nextDelayValue">3 s</span>
-        </label>
-
-        <input
-          type="range"
-          id="nextDelay"
-          min="1"
-          max="10"
-          step="1"
-          value="3"
-        />
+      <div class="question-label" id="questionLabel">
+        Question
       </div>
 
-      <div class="control-group">
-        <label for="speechRate">
-          Speech speed:
-          <span class="range-value" id="speechRateValue">0.9</span>
-        </label>
-
-        <input
-          type="range"
-          id="speechRate"
-          min="0.5"
-          max="1.5"
-          step="0.1"
-          value="0.9"
-        />
+      <div class="question" id="question">
+        <div class="loading">
+          Loading Google Sheet...
+        </div>
       </div>
 
+      <div id="answerContainer" class="hidden">
+        <div class="question-label">
+          Answer
+        </div>
+
+        <div class="answer" id="answer"></div>
+      </div>
+
+      <div class="button-row" style="justify-content: center">
+        <button id="replayBtn" class="primary">
+          🔊 Replay
+        </button>
+
+        <button id="showAnswerBtn">
+          👁 Show Answer
+        </button>
+
+        <button id="speakAnswerBtn">
+          🔊 Speak Answer
+        </button>
+
+        <button id="nextBtn">
+          Next →
+        </button>
+      </div>
+
+      <div class="status" id="status"></div>
     </div>
-
   </div>
 
+  <script>
+    /* ============================================================
+       GOOGLE SHEET CONFIGURATION
+       ============================================================ */
 
-  <!-- SENTENCE -->
-  <div class="card sentence-card">
+    const SHEET_ID =
+      "1jf4Rbrl-zyghEYq-u5CX3P96192JCp0ee6gDaNHL0Js";
 
-    <div class="progress" id="progress">
-      Loading sentences...
-    </div>
+    const GID =
+      "189791548";
 
-    <div class="question-label" id="questionLabel">
-      Question
-    </div>
+    /* ============================================================
+       APPLICATION STATE
+       ============================================================ */
 
-    <div class="question" id="question">
-      <div class="loading">
-        Loading Google Sheet...
-      </div>
-    </div>
+    const RANGE_SIZE = 50;
 
-    <div id="answerContainer" class="hidden">
+    let sentences = [];
+    let queue = [];
+    let queueIndex = 0;
 
-      <div class="question-label">
-        Answer
-      </div>
+    let mode = "en-de";
+    let autoPlay = false;
+    let answerDelay = 4;
+    let nextDelay = 3;
+    let speechRate = 0.9;
 
-      <div class="answer" id="answer"></div>
+    let autoTimer = null;
+    let isSpeaking = false;
 
-    </div>
+    /*
+     * Stores selected ranges by their first zero-based index.
+     *
+     * 0 = sentences 1–50
+     * 50 = sentences 51–100
+     * 100 = sentences 101–150
+     */
+    let selectedRangeStarts = null;
 
-    <div class="button-row" style="justify-content:center">
+    /* ============================================================
+       DOM ELEMENTS
+       ============================================================ */
 
-      <button id="replayBtn" class="primary">
-        🔊 Replay
-      </button>
+    const modeElement =
+      document.getElementById("mode");
 
-      <button id="showAnswerBtn">
-        👁 Show Answer
-      </button>
+    const randomizeBtn =
+      document.getElementById("randomizeBtn");
 
-      <button id="speakAnswerBtn">
-        🔊 Speak Answer
-      </button>
+    const restartBtn =
+      document.getElementById("restartBtn");
 
-      <button id="nextBtn">
-        Next →
-      </button>
+    const replayBtn =
+      document.getElementById("replayBtn");
 
-    </div>
+    const showAnswerBtn =
+      document.getElementById("showAnswerBtn");
 
-    <div class="status" id="status"></div>
+    const speakAnswerBtn =
+      document.getElementById("speakAnswerBtn");
 
-  </div>
+    const nextBtn =
+      document.getElementById("nextBtn");
 
-</div>
+    const autoPlayElement =
+      document.getElementById("autoPlay");
 
+    const answerDelayElement =
+      document.getElementById("answerDelay");
 
-<script>
+    const nextDelayElement =
+      document.getElementById("nextDelay");
 
-  /* ============================================================
-     GOOGLE SHEET CONFIGURATION
-     ============================================================ */
+    const speechRateElement =
+      document.getElementById("speechRate");
 
-  const SHEET_ID =
-    "1jf4Rbrl-zyghEYq-u5CX3P96192JCp0ee6gDaNHL0Js";
+    const answerDelayValue =
+      document.getElementById("answerDelayValue");
 
-  const GID =
-    "189791548";
+    const nextDelayValue =
+      document.getElementById("nextDelayValue");
 
+    const speechRateValue =
+      document.getElementById("speechRateValue");
 
-  /* ============================================================
-     APPLICATION STATE
-     ============================================================ */
+    const questionElement =
+      document.getElementById("question");
 
-  let sentences = [];
+    const questionLabel =
+      document.getElementById("questionLabel");
+
+    const answerElement =
+      document.getElementById("answer");
+
+    const answerContainer =
+      document.getElementById("answerContainer");
+
+    const progressElement =
+      document.getElementById("progress");
+
+    const statusElement =
+      document.getElementById("status");
+
+    const rangeList =
+      document.getElementById("rangeList");
+
+    const selectAllRangesBtn =
+      document.getElementById("selectAllRangesBtn");
+
+    const deselectAllRangesBtn =
+      document.getElementById("deselectAllRangesBtn");
+
+    /* ============================================================
+       LOCAL STORAGE
+       ============================================================ */
+
+    const STORAGE_KEY =
+      "german_sentence_trainer_v2";
+
+    function saveState() {
+      const state = {
+        queue: queue,
+        queueIndex: queueIndex,
+        mode: mode,
+        autoPlay: autoPlay,
+        answerDelay: answerDelay,
+        nextDelay: nextDelay,
+        speechRate: speechRate,
+        selectedRangeStarts: selectedRangeStarts
+      };
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state)
+      );
+    }
+
+    function loadState() {
+      try {
+        const saved =
+          localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) {
+          return false;
+        }
+
+        const state =
+          JSON.parse(saved);
+
+        if (
+          Array.isArray(state.queue) &&
+          typeof state.queueIndex === "number"
+        ) {
+          queue = state.queue;
+          queueIndex = state.queueIndex;
+        }
+
+        if (
+          state.mode === "en-de" ||
+          state.mode === "de-en"
+        ) {
+          mode = state.mode;
+        }
+
+        if (typeof state.autoPlay === "boolean") {
+          autoPlay = state.autoPlay;
+        }
+
+        if (typeof state.answerDelay === "number") {
+          answerDelay = state.answerDelay;
+        }
+
+        if (typeof state.nextDelay === "number") {
+          nextDelay = state.nextDelay;
+        }
+
+        if (typeof state.speechRate === "number") {
+          speechRate = state.speechRate;
+        }
+
+        if (Array.isArray(state.selectedRangeStarts)) {
+          selectedRangeStarts =
+            state.selectedRangeStarts.filter(
+              value => Number.isInteger(value)
+            );
+        }
+
+        return true;
+      } catch (error) {
+        console.error(
+          "Could not restore saved state:",
+          error
+        );
 
-  let queue = [];
-
-  let queueIndex = 0;
-
-  let mode = "en-de";
-
-  let autoPlay = false;
-
-  let answerDelay = 4;
-
-  let nextDelay = 3;
-
-  let speechRate = 0.9;
-
-  let autoTimer = null;
-
-  let isSpeaking = false;
-
-
-  /* ============================================================
-     DOM ELEMENTS
-     ============================================================ */
-
-  const modeElement =
-    document.getElementById("mode");
-
-  const randomizeBtn =
-    document.getElementById("randomizeBtn");
-
-  const restartBtn =
-    document.getElementById("restartBtn");
-
-  const replayBtn =
-    document.getElementById("replayBtn");
-
-  const showAnswerBtn =
-    document.getElementById("showAnswerBtn");
-
-  const speakAnswerBtn =
-    document.getElementById("speakAnswerBtn");
-
-  const nextBtn =
-    document.getElementById("nextBtn");
-
-  const autoPlayElement =
-    document.getElementById("autoPlay");
-
-  const answerDelayElement =
-    document.getElementById("answerDelay");
-
-  const nextDelayElement =
-    document.getElementById("nextDelay");
-
-  const speechRateElement =
-    document.getElementById("speechRate");
-
-  const answerDelayValue =
-    document.getElementById("answerDelayValue");
-
-  const nextDelayValue =
-    document.getElementById("nextDelayValue");
-
-  const speechRateValue =
-    document.getElementById("speechRateValue");
-
-  const questionElement =
-    document.getElementById("question");
-
-  const questionLabel =
-    document.getElementById("questionLabel");
-
-  const answerElement =
-    document.getElementById("answer");
-
-  const answerContainer =
-    document.getElementById("answerContainer");
-
-  const progressElement =
-    document.getElementById("progress");
-
-  const statusElement =
-    document.getElementById("status");
-
-
-  /* ============================================================
-     LOCAL STORAGE
-     ============================================================ */
-
-  const STORAGE_KEY =
-    "german_sentence_trainer_v1";
-
-
-  function saveState() {
-
-    const state = {
-
-      queue: queue,
-
-      queueIndex: queueIndex,
-
-      mode: mode,
-
-      autoPlay: autoPlay,
-
-      answerDelay: answerDelay,
-
-      nextDelay: nextDelay,
-
-      speechRate: speechRate
-
-    };
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(state)
-    );
-  }
-
-
-  function loadState() {
-
-    try {
-
-      const saved =
-        localStorage.getItem(STORAGE_KEY);
-
-      if (!saved) {
         return false;
       }
+    }
 
-      const state =
-        JSON.parse(saved);
+    /* ============================================================
+       SHUFFLE
+       ============================================================ */
 
-      if (
-        Array.isArray(state.queue) &&
-        typeof state.queueIndex === "number"
+    function shuffle(array) {
+      const result = [...array];
+
+      for (
+        let i = result.length - 1;
+        i > 0;
+        i--
       ) {
+        const j =
+          Math.floor(Math.random() * (i + 1));
 
-        queue = state.queue;
-        queueIndex = state.queueIndex;
-
+        [result[i], result[j]] =
+          [result[j], result[i]];
       }
 
-      if (
-        state.mode === "en-de" ||
-        state.mode === "de-en"
-      ) {
-        mode = state.mode;
-      }
+      return result;
+    }
 
-      if (typeof state.autoPlay === "boolean") {
-        autoPlay = state.autoPlay;
-      }
+    /* ============================================================
+       SENTENCE RANGE SELECTION
+       ============================================================ */
 
-      if (typeof state.answerDelay === "number") {
-        answerDelay = state.answerDelay;
-      }
+    function getAvailableRangeStarts() {
+      const numberOfRanges =
+        Math.ceil(sentences.length / RANGE_SIZE);
 
-      if (typeof state.nextDelay === "number") {
-        nextDelay = state.nextDelay;
-      }
-
-      if (typeof state.speechRate === "number") {
-        speechRate = state.speechRate;
-      }
-
-      return true;
-
-    } catch (error) {
-
-      console.error(
-        "Could not restore saved state:",
-        error
+      return Array.from(
+        { length: numberOfRanges },
+        (_, index) => index * RANGE_SIZE
       );
-
-      return false;
-    }
-  }
-
-
-  /* ============================================================
-     SHUFFLE
-     ============================================================ */
-
-  function shuffle(array) {
-
-    const result = [...array];
-
-    for (
-      let i = result.length - 1;
-      i > 0;
-      i--
-    ) {
-
-      const j =
-        Math.floor(Math.random() * (i + 1));
-
-      [
-        result[i],
-        result[j]
-      ] = [
-        result[j],
-        result[i]
-      ];
     }
 
-    return result;
-  }
+    function normalizeSelectedRanges() {
+      const availableRanges =
+        getAvailableRangeStarts();
 
+      /*
+       * On first use, all ranges are selected.
+       */
+      if (selectedRangeStarts === null) {
+        selectedRangeStarts =
+          [...availableRanges];
+        return;
+      }
 
-  /* ============================================================
-     GOOGLE SHEET LOADING
-     ============================================================ */
+      /*
+       * Removes range starts that are no longer valid if
+       * the Google Sheet has been reduced in size.
+       */
+      selectedRangeStarts =
+        selectedRangeStarts.filter(
+          start => availableRanges.includes(start)
+        );
+    }
 
-  function loadSheet() {
+    function getEligibleIndices() {
+      const selectedRanges =
+        new Set(selectedRangeStarts || []);
 
-    statusElement.textContent =
-      "Loading sentences...";
+      return sentences
+        .map((_, index) => index)
+        .filter(index => {
+          const rangeStart =
+            Math.floor(index / RANGE_SIZE) *
+            RANGE_SIZE;
 
-    const script =
-      document.createElement("script");
+          return selectedRanges.has(rangeStart);
+        });
+    }
 
-    const query =
-      "select A,B";
+    function buildQueue() {
+      return shuffle(getEligibleIndices());
+    }
 
-    script.src =
-      "https://docs.google.com/spreadsheets/d/" +
-      SHEET_ID +
-      "/gviz/tq" +
-      "?tqx=responseHandler:sheetCallback;headers=1" +
-      "&gid=" +
-      encodeURIComponent(GID) +
-      "&tq=" +
-      encodeURIComponent(query) +
-      "&t=" +
-      Date.now();
+    function renderRangeSelection() {
+      const ranges =
+        getAvailableRangeStarts();
 
-    script.onerror = function () {
+      rangeList.innerHTML = "";
 
-      questionElement.innerHTML =
-        '<div class="error">' +
-        "Could not load the Google Sheet." +
-        "</div>";
+      ranges.forEach(function(start) {
+        const end =
+          Math.min(
+            start + RANGE_SIZE,
+            sentences.length
+          );
 
+        const selected =
+          selectedRangeStarts.includes(start);
+
+        const label =
+          document.createElement("label");
+
+        label.className =
+          "range-option";
+
+        label.innerHTML =
+          '<input type="checkbox" ' +
+          'class="range-checkbox" ' +
+          'data-range-start="' + start + '" ' +
+          (selected ? "checked" : "") +
+          ">" +
+          "<span>" +
+          (start + 1) +
+          "–" +
+          end +
+          "</span>";
+
+        rangeList.appendChild(label);
+      });
+    }
+
+    function updateSelectedRangesFromCheckboxes() {
+      const checkboxes =
+        rangeList.querySelectorAll(
+          ".range-checkbox"
+        );
+
+      selectedRangeStarts =
+        Array.from(checkboxes)
+          .filter(
+            checkbox => checkbox.checked
+          )
+          .map(
+            checkbox =>
+              Number(
+                checkbox.dataset.rangeStart
+              )
+          );
+    }
+
+    function applyRangeSelection() {
+      stopAutoPlay();
+
+      queue = buildQueue();
+      queueIndex = 0;
+
+      renderRangeSelection();
+      updateQuestion();
+      saveState();
+
+      const selectedSentenceCount =
+        getEligibleIndices().length;
+
+      if (selectedSentenceCount === 0) {
+        statusElement.textContent =
+          "Please select at least one sentence range.";
+      } else {
+        statusElement.textContent =
+          `${selectedSentenceCount} sentences selected.`;
+      }
+    }
+
+    function selectAllRanges() {
+      selectedRangeStarts =
+        getAvailableRangeStarts();
+
+      applyRangeSelection();
+    }
+
+    function deselectAllRanges() {
+      selectedRangeStarts = [];
+
+      applyRangeSelection();
+    }
+
+    /* ============================================================
+       GOOGLE SHEET LOADING
+       ============================================================ */
+
+    function loadSheet() {
       statusElement.textContent =
-        "Check that the Google Sheet is publicly accessible.";
+        "Loading sentences...";
 
-    };
+      const script =
+        document.createElement("script");
 
-    document.body.appendChild(script);
-  }
+      const query =
+        "select A,B";
 
+      script.src =
+        "https://docs.google.com/spreadsheets/d/" +
+        SHEET_ID +
+        "/gviz/tq" +
+        "?tqx=responseHandler:sheetCallback;headers=1" +
+        "&gid=" +
+        encodeURIComponent(GID) +
+        "&tq=" +
+        encodeURIComponent(query) +
+        "&t=" +
+        Date.now();
 
-  /*
-   * Google Visualization API callback.
-   *
-   * Column A = German
-   * Column B = English
-   */
+      script.onerror = function() {
+        questionElement.innerHTML =
+          '<div class="error">' +
+          "Could not load the Google Sheet." +
+          "</div>";
 
-  window.sheetCallback =
-    function(data) {
+        statusElement.textContent =
+          "Check that the Google Sheet is publicly accessible.";
+      };
 
-      try {
+      document.body.appendChild(script);
+    }
 
-        const rows =
-          data.table.rows;
+    /*
+     * Column A = German
+     * Column B = English
+     */
+    window.sheetCallback =
+      function(data) {
+        try {
+          const rows =
+            data.table.rows;
 
-        sentences = [];
+          sentences = [];
 
-        rows.forEach(function(row) {
+          rows.forEach(function(row) {
+            const german =
+              row.c[0]
+                ? String(row.c[0].v || "").trim()
+                : "";
 
-          const german =
-            row.c[0]
-              ? String(row.c[0].v || "").trim()
-              : "";
+            const english =
+              row.c[1]
+                ? String(row.c[1].v || "").trim()
+                : "";
 
-          const english =
-            row.c[1]
-              ? String(row.c[1].v || "").trim()
-              : "";
+            if (german && english) {
+              sentences.push({
+                german: german,
+                english: english
+              });
+            }
+          });
 
-          if (german && english) {
+          if (sentences.length === 0) {
+            questionElement.innerHTML =
+              '<div class="error">' +
+              "No sentences were found in columns A and B." +
+              "</div>";
 
-            sentences.push({
-              german: german,
-              english: english
-            });
-
+            statusElement.textContent = "";
+            return;
           }
 
-        });
-
-
-        if (sentences.length === 0) {
+          initializeApplication();
+        } catch (error) {
+          console.error(error);
 
           questionElement.innerHTML =
             '<div class="error">' +
-            "No sentences were found in columns A and B." +
+            "Could not process the Google Sheet." +
             "</div>";
-
-          statusElement.textContent = "";
-
-          return;
         }
+      };
 
+    /* ============================================================
+       INITIALIZATION
+       ============================================================ */
 
-        initializeApplication();
-
-      } catch (error) {
-
-        console.error(error);
-
-        questionElement.innerHTML =
-          '<div class="error">' +
-          "Could not process the Google Sheet." +
-          "</div>";
-
-      }
-
-    };
-
-
-  /* ============================================================
-     INITIALIZATION
-     ============================================================ */
-
-  function initializeApplication() {
-
-    const restored =
+    function initializeApplication() {
       loadState();
 
+      normalizeSelectedRanges();
 
-    /*
-     * Validate restored queue.
-     *
-     * If the Google Sheet has changed and the old queue
-     * contains invalid indices, create a new queue.
-     */
-
-    const queueIsValid =
-      queue.length === sentences.length &&
-      queue.every(
-        index =>
-          Number.isInteger(index) &&
-          index >= 0 &&
-          index < sentences.length
-      );
-
-
-    if (!queueIsValid) {
-
-      queue =
-        shuffle(
-          sentences.map(
-            (_, index) => index
-          )
-        );
-
-      queueIndex = 0;
-
-    } else {
+      const eligibleIndices =
+        getEligibleIndices();
 
       /*
-       * Make sure queueIndex is valid.
+       * Restored queues are used only when they match
+       * the currently selected sentence ranges.
        */
+      const queueIsValid =
+        queue.length === eligibleIndices.length &&
+        queue.every(
+          index =>
+            Number.isInteger(index) &&
+            eligibleIndices.includes(index)
+        ) &&
+        new Set(queue).size === queue.length;
 
-      if (
+      if (!queueIsValid) {
+        queue = buildQueue();
+        queueIndex = 0;
+      } else if (
         queueIndex < 0 ||
         queueIndex >= queue.length
       ) {
         queueIndex = 0;
       }
 
+      modeElement.value = mode;
+      autoPlayElement.checked = false;
+
+      answerDelayElement.value =
+        answerDelay;
+
+      nextDelayElement.value =
+        nextDelay;
+
+      speechRateElement.value =
+        speechRate;
+
+      /*
+       * Automatic practice is deliberately not continued
+       * immediately after a page refresh.
+       */
+      autoPlay = false;
+
+      updateSettingsDisplay();
+      renderRangeSelection();
+      updateQuestion();
+      saveState();
+
+      statusElement.textContent =
+        `${sentences.length} sentences loaded.`;
     }
 
+    /* ============================================================
+       QUESTION DISPLAY
+       ============================================================ */
 
-    modeElement.value =
-      mode;
+    function getCurrentSentence() {
+      if (
+        !sentences.length ||
+        !queue.length
+      ) {
+        return null;
+      }
 
-    autoPlayElement.checked =
-      autoPlay;
+      const index =
+        queue[queueIndex];
 
-    answerDelayElement.value =
-      answerDelay;
-
-    nextDelayElement.value =
-      nextDelay;
-
-    speechRateElement.value =
-      speechRate;
-
-    updateSettingsDisplay();
-
-    updateQuestion();
-
-    saveState();
-
-    statusElement.textContent =
-      `${sentences.length} sentences loaded.`;
-
-  }
-
-
-  /* ============================================================
-     QUESTION DISPLAY
-     ============================================================ */
-
-  function getCurrentSentence() {
-
-    if (
-      !sentences.length ||
-      !queue.length
-    ) {
-      return null;
+      return sentences[index];
     }
 
-    const index =
-      queue[queueIndex];
+    function updateQuestion() {
+      const sentence =
+        getCurrentSentence();
 
-    return sentences[index];
+      stopSpeech();
+      clearAutoTimer();
 
-  }
+      if (!sentence) {
+        questionLabel.textContent =
+          "No sentence range selected";
 
+        questionElement.textContent =
+          "Select one or more sentence ranges above to start practising.";
 
-  function updateQuestion() {
-
-    const sentence =
-      getCurrentSentence();
-
-    if (!sentence) {
-      return;
-    }
-
-
-    stopSpeech();
-
-    clearAutoTimer();
-
-
-    const question =
-      mode === "en-de"
-        ? sentence.english
-        : sentence.german;
-
-
-    questionElement.textContent =
-      question;
-
-
-    questionLabel.textContent =
-      mode === "en-de"
-        ? "Listen to English → Speak German"
-        : "Listen to German → Speak English";
-
-
-    answerElement.textContent =
-      mode === "en-de"
-        ? sentence.german
-        : sentence.english;
-
-
-    answerContainer.classList.add(
-      "hidden"
-    );
-
-
-    showAnswerBtn.textContent =
-      "👁 Show Answer";
-
-
-    progressElement.textContent =
-      `Sentence ${queueIndex + 1} / ${queue.length}`;
-
-
-    statusElement.textContent =
-      "";
-
-
-    saveState();
-
-  }
-
-
-  /* ============================================================
-     TEXT TO SPEECH
-     ============================================================ */
-
-  function getVoice(language) {
-
-    const voices =
-      window.speechSynthesis.getVoices();
-
-    if (!voices.length) {
-      return null;
-    }
-
-
-    /*
-     * First try exact language.
-     */
-
-    let voice =
-      voices.find(
-        v =>
-          v.lang.toLowerCase() ===
-          language.toLowerCase()
-      );
-
-
-    /*
-     * Otherwise try language prefix.
-     */
-
-    if (!voice) {
-
-      const prefix =
-        language
-          .split("-")[0]
-          .toLowerCase();
-
-      voice =
-        voices.find(
-          v =>
-            v.lang
-              .toLowerCase()
-              .startsWith(prefix)
+        answerContainer.classList.add(
+          "hidden"
         );
 
-    }
-
-
-    return voice || null;
-
-  }
-
-
-  function speak(
-    text,
-    language,
-    callback
-  ) {
-
-    stopSpeech();
-
-    const utterance =
-      new SpeechSynthesisUtterance(text);
-
-    utterance.lang =
-      language;
-
-    utterance.rate =
-      speechRate;
-
-    const voice =
-      getVoice(language);
-
-    if (voice) {
-      utterance.voice = voice;
-    }
-
-
-    utterance.onstart =
-      function() {
-
-        isSpeaking = true;
-
-        statusElement.textContent =
-          "🔊 Speaking...";
-
-      };
-
-
-    utterance.onend =
-      function() {
-
-        isSpeaking = false;
-
-        if (callback) {
-          callback();
-        } else {
-          statusElement.textContent = "";
-        }
-
-      };
-
-
-    utterance.onerror =
-      function(event) {
-
-        isSpeaking = false;
-
-        console.error(
-          "Speech synthesis error:",
-          event
-        );
-
-        statusElement.textContent =
-          "Speech synthesis error.";
-
-        if (callback) {
-          callback();
-        }
-
-      };
-
-
-    window.speechSynthesis.speak(
-      utterance
-    );
-
-  }
-
-
-  function stopSpeech() {
-
-    if (
-      "speechSynthesis" in window
-    ) {
-
-      window.speechSynthesis.cancel();
-
-    }
-
-    isSpeaking = false;
-
-  }
-
-
-  /* ============================================================
-     SPEAK QUESTION
-     ============================================================ */
-
-  function speakQuestion() {
-
-    const sentence =
-      getCurrentSentence();
-
-    if (!sentence) {
-      return;
-    }
-
-
-    const text =
-      mode === "en-de"
-        ? sentence.english
-        : sentence.german;
-
-
-    const language =
-      mode === "en-de"
-        ? "en-US"
-        : "de-DE";
-
-
-    speak(
-      text,
-      language
-    );
-
-  }
-
-
-  /* ============================================================
-     SPEAK ANSWER
-     ============================================================ */
-
-  function speakAnswer() {
-
-    const sentence =
-      getCurrentSentence();
-
-    if (!sentence) {
-      return;
-    }
-
-
-    showAnswer();
-
-
-    const text =
-      mode === "en-de"
-        ? sentence.german
-        : sentence.english;
-
-
-    const language =
-      mode === "en-de"
-        ? "de-DE"
-        : "en-US";
-
-
-    speak(
-      text,
-      language
-    );
-
-  }
-
-
-  /* ============================================================
-     SHOW ANSWER
-     ============================================================ */
-
-  function showAnswer() {
-
-    answerContainer.classList.remove(
-      "hidden"
-    );
-
-    showAnswerBtn.textContent =
-      "🙈 Hide Answer";
-
-  }
-
-
-  function toggleAnswer() {
-
-    if (
-      answerContainer.classList.contains(
-        "hidden"
-      )
-    ) {
-
-      showAnswer();
-
-    } else {
+        progressElement.textContent =
+          "0 / 0";
+
+        return;
+      }
+
+      const question =
+        mode === "en-de"
+          ? sentence.english
+          : sentence.german;
+
+      questionElement.textContent =
+        question;
+
+      questionLabel.textContent =
+        mode === "en-de"
+          ? "Listen to English → Speak German"
+          : "Listen to German → Speak English";
+
+      answerElement.textContent =
+        mode === "en-de"
+          ? sentence.german
+          : sentence.english;
 
       answerContainer.classList.add(
         "hidden"
@@ -1182,552 +1084,579 @@
       showAnswerBtn.textContent =
         "👁 Show Answer";
 
+      progressElement.textContent =
+        `Sentence ${queueIndex + 1} / ${queue.length}`;
+
+      statusElement.textContent = "";
+
+      saveState();
     }
 
-  }
-
-
-  /* ============================================================
-     NEXT SENTENCE
-     ============================================================ */
-
-  function nextSentence() {
-
-    stopSpeech();
-
-    clearAutoTimer();
-
-
-    if (!queue.length) {
-      return;
-    }
-
-
-    queueIndex++;
-
-
-    /*
-     * When the current sequence is finished,
-     * generate another randomized sequence.
-     */
-
-    if (queueIndex >= queue.length) {
-
-      queue =
-        shuffle(
-          sentences.map(
-            (_, index) => index
-          )
-        );
-
-      queueIndex = 0;
-
-    }
-
-
-    updateQuestion();
-
-    saveState();
-
-  }
-
-
-  /* ============================================================
-     RANDOMIZE
-     ============================================================ */
-
-  function randomizeSequence() {
-
-    stopAutoPlay();
-
-    stopSpeech();
-
-
-    queue =
-      shuffle(
-        sentences.map(
-          (_, index) => index
-        )
-      );
-
-    queueIndex = 0;
-
-
-    updateQuestion();
-
-    statusElement.textContent =
-      "🔀 New randomized sequence.";
-
-    saveState();
-
-  }
-
-
-  /* ============================================================
-     RESTART
-     ============================================================ */
-
-  function restartSequence() {
-
-    stopAutoPlay();
-
-    stopSpeech();
-
-    queueIndex = 0;
-
-    updateQuestion();
-
-    statusElement.textContent =
-      "Sequence restarted.";
-
-    saveState();
-
-  }
-
-
-  /* ============================================================
-     AUTOMATIC PRACTICE
-     ============================================================ */
-
-  function clearAutoTimer() {
-
-    if (autoTimer !== null) {
-
-      clearTimeout(autoTimer);
-
-      autoTimer = null;
-
-    }
-
-  }
-
-
-  function startAutoPlay() {
-
-    if (!sentences.length) {
-      return;
-    }
-
-
-    autoPlay = true;
-
-    autoPlayElement.checked =
-      true;
-
-    saveState();
-
-
-    runAutoSentence();
-
-  }
-
-
-  function stopAutoPlay() {
-
-    autoPlay = false;
-
-    autoPlayElement.checked =
-      false;
-
-    clearAutoTimer();
-
-    stopSpeech();
-
-    statusElement.textContent =
-      "Automatic practice stopped.";
-
-    saveState();
-
-  }
-
-
-  function runAutoSentence() {
-
-    if (!autoPlay) {
-      return;
-    }
-
-
-    const sentence =
-      getCurrentSentence();
-
-    if (!sentence) {
-      return;
-    }
-
-
-    /*
-     * Make sure answer is hidden initially.
-     */
-
-    answerContainer.classList.add(
-      "hidden"
-    );
-
-    showAnswerBtn.textContent =
-      "👁 Show Answer";
-
-
-    /*
-     * STEP 1
-     *
-     * Speak the question.
-     */
-
-    const question =
-      mode === "en-de"
-        ? sentence.english
-        : sentence.german;
-
-
-    const questionLanguage =
-      mode === "en-de"
-        ? "en-US"
-        : "de-DE";
-
-
-    statusElement.textContent =
-      "🔊 Question";
-
-
-    speak(
-      question,
-      questionLanguage,
-      function() {
-
-        if (!autoPlay) {
-          return;
-        }
-
-
-        /*
-         * STEP 2
-         *
-         * Wait for the user to answer aloud.
-         */
-
-        statusElement.textContent =
-          `🎤 Your turn... (${answerDelay}s)`;
-
-
-        autoTimer =
-          setTimeout(
-            function() {
-
-              if (!autoPlay) {
-                return;
-              }
-
-
-              /*
-               * STEP 3
-               *
-               * Reveal and speak answer.
-               */
-
-              showAnswer();
-
-
-              const answer =
-                mode === "en-de"
-                  ? sentence.german
-                  : sentence.english;
-
-
-              const answerLanguage =
-                mode === "en-de"
-                  ? "de-DE"
-                  : "en-US";
-
-
-              speak(
-                answer,
-                answerLanguage,
-                function() {
-
-                  if (!autoPlay) {
-                    return;
-                  }
-
-
-                  /*
-                   * STEP 4
-                   *
-                   * Wait before moving
-                   * to next sentence.
-                   */
-
-                  statusElement.textContent =
-                    `Next sentence in ${nextDelay}s...`;
-
-
-                  autoTimer =
-                    setTimeout(
-                      function() {
-
-                        if (!autoPlay) {
-                          return;
-                        }
-
-
-                        queueIndex++;
-
-
-                        /*
-                         * At the end of the sequence,
-                         * create a new randomized queue.
-                         */
-
-                        if (
-                          queueIndex >= queue.length
-                        ) {
-
-                          queue =
-                            shuffle(
-                              sentences.map(
-                                (_, index) => index
-                              )
-                            );
-
-                          queueIndex = 0;
-
-                        }
-
-
-                        updateQuestion();
-
-                        saveState();
-
-                        runAutoSentence();
-
-                      },
-                      nextDelay * 1000
-                    );
-
-                }
-
-              );
-
-            },
-            answerDelay * 1000
-          );
-
+    /* ============================================================
+       TEXT TO SPEECH
+       ============================================================ */
+
+    function getVoice(language) {
+      const voices =
+        window.speechSynthesis.getVoices();
+
+      if (!voices.length) {
+        return null;
       }
 
-    );
+      let voice =
+        voices.find(
+          v =>
+            v.lang.toLowerCase() ===
+            language.toLowerCase()
+        );
 
-  }
+      if (!voice) {
+        const prefix =
+          language
+            .split("-")[0]
+            .toLowerCase();
 
+        voice =
+          voices.find(
+            v =>
+              v.lang
+                .toLowerCase()
+                .startsWith(prefix)
+          );
+      }
 
-  /* ============================================================
-     SETTINGS
-     ============================================================ */
+      return voice || null;
+    }
 
-  function updateSettingsDisplay() {
+    function speak(
+      text,
+      language,
+      callback
+    ) {
+      stopSpeech();
 
-    answerDelayValue.textContent =
-      `${answerDelay} s`;
+      const utterance =
+        new SpeechSynthesisUtterance(text);
 
-    nextDelayValue.textContent =
-      `${nextDelay} s`;
+      utterance.lang = language;
+      utterance.rate = speechRate;
 
-    speechRateValue.textContent =
-      speechRate.toFixed(1);
+      const voice =
+        getVoice(language);
 
-  }
+      if (voice) {
+        utterance.voice = voice;
+      }
 
+      utterance.onstart =
+        function() {
+          isSpeaking = true;
 
-  /* ============================================================
-     EVENT HANDLERS
-     ============================================================ */
+          statusElement.textContent =
+            "🔊 Speaking...";
+        };
 
-  modeElement.addEventListener(
-    "change",
-    function() {
+      utterance.onend =
+        function() {
+          isSpeaking = false;
 
-      mode =
-        modeElement.value;
+          if (callback) {
+            callback();
+          } else {
+            statusElement.textContent = "";
+          }
+        };
+
+      utterance.onerror =
+        function(event) {
+          isSpeaking = false;
+
+          console.error(
+            "Speech synthesis error:",
+            event
+          );
+
+          statusElement.textContent =
+            "Speech synthesis error.";
+
+          if (callback) {
+            callback();
+          }
+        };
+
+      window.speechSynthesis.speak(
+        utterance
+      );
+    }
+
+    function stopSpeech() {
+      if (
+        "speechSynthesis" in window
+      ) {
+        window.speechSynthesis.cancel();
+      }
+
+      isSpeaking = false;
+    }
+
+    /* ============================================================
+       SPEAK QUESTION AND ANSWER
+       ============================================================ */
+
+    function speakQuestion() {
+      const sentence =
+        getCurrentSentence();
+
+      if (!sentence) {
+        return;
+      }
+
+      const text =
+        mode === "en-de"
+          ? sentence.english
+          : sentence.german;
+
+      const language =
+        mode === "en-de"
+          ? "en-US"
+          : "de-DE";
+
+      speak(text, language);
+    }
+
+    function speakAnswer() {
+      const sentence =
+        getCurrentSentence();
+
+      if (!sentence) {
+        return;
+      }
+
+      showAnswer();
+
+      const text =
+        mode === "en-de"
+          ? sentence.german
+          : sentence.english;
+
+      const language =
+        mode === "en-de"
+          ? "de-DE"
+          : "en-US";
+
+      speak(text, language);
+    }
+
+    /* ============================================================
+       SHOW ANSWER
+       ============================================================ */
+
+    function showAnswer() {
+      answerContainer.classList.remove(
+        "hidden"
+      );
+
+      showAnswerBtn.textContent =
+        "🙈 Hide Answer";
+    }
+
+    function toggleAnswer() {
+      if (
+        answerContainer.classList.contains(
+          "hidden"
+        )
+      ) {
+        showAnswer();
+      } else {
+        answerContainer.classList.add(
+          "hidden"
+        );
+
+        showAnswerBtn.textContent =
+          "👁 Show Answer";
+      }
+    }
+
+    /* ============================================================
+       NEXT SENTENCE
+       ============================================================ */
+
+    function nextSentence() {
+      stopSpeech();
+      clearAutoTimer();
+
+      if (!queue.length) {
+        return;
+      }
+
+      queueIndex++;
+
+      if (queueIndex >= queue.length) {
+        queue = buildQueue();
+        queueIndex = 0;
+      }
+
+      updateQuestion();
+      saveState();
+    }
+
+    /* ============================================================
+       RANDOMIZE / RESTART
+       ============================================================ */
+
+    function randomizeSequence() {
+      stopAutoPlay();
+      stopSpeech();
+
+      queue = buildQueue();
+      queueIndex = 0;
 
       updateQuestion();
 
+      statusElement.textContent =
+        "🔀 New randomized sequence.";
+
       saveState();
-
     }
-  );
 
+    function restartSequence() {
+      stopAutoPlay();
+      stopSpeech();
 
-  randomizeBtn.addEventListener(
-    "click",
-    function() {
+      queueIndex = 0;
 
-      randomizeSequence();
+      updateQuestion();
 
+      statusElement.textContent =
+        "Sequence restarted.";
+
+      saveState();
     }
-  );
 
+    /* ============================================================
+       AUTOMATIC PRACTICE
+       ============================================================ */
 
-  restartBtn.addEventListener(
-    "click",
-    function() {
-
-      restartSequence();
-
+    function clearAutoTimer() {
+      if (autoTimer !== null) {
+        clearTimeout(autoTimer);
+        autoTimer = null;
+      }
     }
-  );
 
-
-  replayBtn.addEventListener(
-    "click",
-    function() {
-
-      speakQuestion();
-
-    }
-  );
-
-
-  showAnswerBtn.addEventListener(
-    "click",
-    function() {
-
-      toggleAnswer();
-
-    }
-  );
-
-
-  speakAnswerBtn.addEventListener(
-    "click",
-    function() {
-
-      speakAnswer();
-
-    }
-  );
-
-
-  nextBtn.addEventListener(
-    "click",
-    function() {
-
-      nextSentence();
-
-    }
-  );
-
-
-  autoPlayElement.addEventListener(
-    "change",
-    function() {
-
-      if (
-        autoPlayElement.checked
-      ) {
-
-        startAutoPlay();
-
-      } else {
-
-        stopAutoPlay();
-
+    function startAutoPlay() {
+      if (!sentences.length) {
+        return;
       }
 
-    }
-  );
+      if (getEligibleIndices().length === 0) {
+        autoPlay = false;
+        autoPlayElement.checked = false;
 
+        statusElement.textContent =
+          "Select at least one sentence range before starting automatic practice.";
 
-  answerDelayElement.addEventListener(
-    "input",
-    function() {
+        saveState();
+        return;
+      }
 
-      answerDelay =
-        Number(
-          answerDelayElement.value
-        );
-
-      updateSettingsDisplay();
-
-      saveState();
-
-    }
-  );
-
-
-  nextDelayElement.addEventListener(
-    "input",
-    function() {
-
-      nextDelay =
-        Number(
-          nextDelayElement.value
-        );
-
-      updateSettingsDisplay();
+      autoPlay = true;
+      autoPlayElement.checked = true;
 
       saveState();
-
+      runAutoSentence();
     }
-  );
 
+    function stopAutoPlay() {
+      autoPlay = false;
+      autoPlayElement.checked = false;
 
-  speechRateElement.addEventListener(
-    "input",
-    function() {
-
-      speechRate =
-        Number(
-          speechRateElement.value
-        );
-
-      updateSettingsDisplay();
+      clearAutoTimer();
+      stopSpeech();
 
       saveState();
-
     }
-  );
 
+    function runAutoSentence() {
+      if (!autoPlay) {
+        return;
+      }
 
-  /* ============================================================
-     SPEECH VOICE INITIALIZATION
-     ============================================================ */
+      const sentence =
+        getCurrentSentence();
 
-  /*
-   * Some browsers populate the available voices
-   * asynchronously.
-   */
+      if (!sentence) {
+        stopAutoPlay();
+        return;
+      }
 
-  if (
-    "speechSynthesis" in window
-  ) {
+      answerContainer.classList.add(
+        "hidden"
+      );
 
-    window.speechSynthesis.onvoiceschanged =
+      showAnswerBtn.textContent =
+        "👁 Show Answer";
+
+      const question =
+        mode === "en-de"
+          ? sentence.english
+          : sentence.german;
+
+      const questionLanguage =
+        mode === "en-de"
+          ? "en-US"
+          : "de-DE";
+
+      statusElement.textContent =
+        "🔊 Question";
+
+      speak(
+        question,
+        questionLanguage,
+        function() {
+          if (!autoPlay) {
+            return;
+          }
+
+          statusElement.textContent =
+            `🎤 Your turn... (${answerDelay}s)`;
+
+          autoTimer =
+            setTimeout(
+              function() {
+                if (!autoPlay) {
+                  return;
+                }
+
+                showAnswer();
+
+                const answer =
+                  mode === "en-de"
+                    ? sentence.german
+                    : sentence.english;
+
+                const answerLanguage =
+                  mode === "en-de"
+                    ? "de-DE"
+                    : "en-US";
+
+                speak(
+                  answer,
+                  answerLanguage,
+                  function() {
+                    if (!autoPlay) {
+                      return;
+                    }
+
+                    statusElement.textContent =
+                      `Next sentence in ${nextDelay}s...`;
+
+                    autoTimer =
+                      setTimeout(
+                        function() {
+                          if (!autoPlay) {
+                            return;
+                          }
+
+                          queueIndex++;
+
+                          if (
+                            queueIndex >= queue.length
+                          ) {
+                            queue = buildQueue();
+                            queueIndex = 0;
+                          }
+
+                          updateQuestion();
+                          runAutoSentence();
+                        },
+                        nextDelay * 1000
+                      );
+                  }
+                );
+              },
+              answerDelay * 1000
+            );
+        }
+      );
+    }
+
+    /* ============================================================
+       SETTINGS
+       ============================================================ */
+
+    function updateSettingsDisplay() {
+      answerDelayValue.textContent =
+        `${answerDelay} s`;
+
+      nextDelayValue.textContent =
+        `${nextDelay} s`;
+
+      speechRateValue.textContent =
+        speechRate.toFixed(1);
+    }
+
+    /* ============================================================
+       EVENT HANDLERS
+       ============================================================ */
+
+    modeElement.addEventListener(
+      "change",
       function() {
+        stopAutoPlay();
 
-        window.speechSynthesis.getVoices();
+        mode = modeElement.value;
 
-      };
+        updateQuestion();
+        saveState();
+      }
+    );
 
-  }
+    randomizeBtn.addEventListener(
+      "click",
+      function() {
+        randomizeSequence();
+      }
+    );
 
+    restartBtn.addEventListener(
+      "click",
+      function() {
+        restartSequence();
+      }
+    );
 
-  /* ============================================================
-     START APPLICATION
-     ============================================================ */
+    replayBtn.addEventListener(
+      "click",
+      function() {
+        speakQuestion();
+      }
+    );
 
-  if (
-    !("speechSynthesis" in window)
-  ) {
+    showAnswerBtn.addEventListener(
+      "click",
+      function() {
+        toggleAnswer();
+      }
+    );
 
-    statusElement.textContent =
-      "Your browser does not support speech synthesis.";
+    speakAnswerBtn.addEventListener(
+      "click",
+      function() {
+        speakAnswer();
+      }
+    );
 
-  }
+    nextBtn.addEventListener(
+      "click",
+      function() {
+        nextSentence();
+      }
+    );
 
+    autoPlayElement.addEventListener(
+      "change",
+      function() {
+        if (autoPlayElement.checked) {
+          startAutoPlay();
+        } else {
+          stopAutoPlay();
 
-  loadSheet();
+          statusElement.textContent =
+            "Automatic practice stopped.";
+        }
+      }
+    );
 
-</script>
+    answerDelayElement.addEventListener(
+      "input",
+      function() {
+        answerDelay =
+          Number(answerDelayElement.value);
 
+        updateSettingsDisplay();
+        saveState();
+      }
+    );
+
+    nextDelayElement.addEventListener(
+      "input",
+      function() {
+        nextDelay =
+          Number(nextDelayElement.value);
+
+        updateSettingsDisplay();
+        saveState();
+      }
+    );
+
+    speechRateElement.addEventListener(
+      "input",
+      function() {
+        speechRate =
+          Number(speechRateElement.value);
+
+        updateSettingsDisplay();
+        saveState();
+      }
+    );
+
+    selectAllRangesBtn.addEventListener(
+      "click",
+      function() {
+        selectAllRanges();
+      }
+    );
+
+    deselectAllRangesBtn.addEventListener(
+      "click",
+      function() {
+        deselectAllRanges();
+      }
+    );
+
+    rangeList.addEventListener(
+      "change",
+      function(event) {
+        if (
+          !event.target.classList.contains(
+            "range-checkbox"
+          )
+        ) {
+          return;
+        }
+
+        updateSelectedRangesFromCheckboxes();
+        applyRangeSelection();
+      }
+    );
+
+    /* ============================================================
+       SPEECH VOICE INITIALIZATION
+       ============================================================ */
+
+    if (
+      "speechSynthesis" in window
+    ) {
+      window.speechSynthesis.onvoiceschanged =
+        function() {
+          window.speechSynthesis.getVoices();
+        };
+    }
+
+    /* ============================================================
+       START APPLICATION
+       ============================================================ */
+
+    if (
+      !("speechSynthesis" in window)
+    ) {
+      statusElement.textContent =
+        "Your browser does not support speech synthesis.";
+    }
+
+    loadSheet();
+  </script>
 </body>
 </html>
-
